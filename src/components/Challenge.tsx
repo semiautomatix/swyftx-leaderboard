@@ -67,13 +67,21 @@ const Challenge: React.FC = () => {
         .where('month', '==', format(new Date(), "MMMM"))
         .where('year', '==', Number(format(new Date(), "yyyy")))
         .get()).docs[0].ref
+      // const periodRef = (await periodCollection
+      //   .where('month', '==', 'November')
+      //   .where('year', '==', 2020)
+      //   .get()).docs[0].ref
       const team = winner ? teamTwo : teamOne    
+      const challengeDoc = challengeCollection.doc(challenge.id)      
       team.forEach(
-        (teamMate) => {
+        async (teamMate) => {
+          const playerDoc = playerCollection.doc(teamMate.id)
           pointsCollection.add({
-            challenge: challengeCollection.doc(challenge.id),
+            challenge: challengeDoc,
+            challengeName: (await challengeDoc.get())?.data()?.name,
             period: periodRef,
-            player: playerCollection.doc(teamMate.id),
+            player: playerDoc,
+            playerName: (await playerDoc.get())?.data()?.name,
             points: 1,
             metaData: JSON.stringify({
               teamOne,
@@ -181,7 +189,7 @@ const Challenge: React.FC = () => {
             </div>
             <Grid container spacing={3}>
               <Grid item xs={12} style={{ padding: '5% 10% 5% 10%' }}>
-                <Button variant="contained" color="primary" style={{ width: '100%' }} onClick={() => declareWinner(1)}>
+                <Button variant="contained" color="primary" style={{ width: '100%' }} onClick={() => declareWinner(0)}>
                   Winner
                 </Button>
               </Grid>
